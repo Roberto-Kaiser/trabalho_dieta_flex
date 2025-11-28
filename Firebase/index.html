@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .users-list {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .user-card {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+
+        .user-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-info {
+            margin-bottom: 10px;
+        }
+
+        .user-info strong {
+            color: #667eea;
+            margin-right: 10px;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-edit {
+            background: #28a745;
+            padding: 8px 20px;
+            border-radius: 5px;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            padding: 8px 20px;
+            border-radius: 5px;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            padding: 8px 20px;
+            border-radius: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+
+        .error {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .no-users {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Sistema de Cadastro</h1>
+
+        <div id="message"></div>
+
+        <div class="form-section">
+            <h2 id="formTitle">Cadastrar Novo Usuário</h2>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                
+                <div class="form-group">
+                    <label for="nome">Nome Completo:</label>
+                    <input type="text" id="nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-mail:</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" required minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label for="idade">Idade:</label>
+                    <input type="number" id="idade" required min="1" max="120">
+                </div>
+
+                <div class="form-group">
+                    <label for="peso">Peso (kg):</label>
+                    <input type="number" id="peso" required min="1" max="500" step="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label for="altura">Altura (cm):</label>
+                    <input type="number" id="altura" required min="50" max="250">
+                </div>
+
+                <div class="user-actions">
+                    <button type="submit" id="submitBtn">Cadastrar</button>
+                    <button type="button" id="cancelBtn" class="btn-cancel" style="display: none;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="users-list">
+            <h2>Usuários Cadastrados</h2>
+            <div id="usersList"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importar Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Configuração do Firebase (SUBSTITUA COM SUAS CREDENCIAIS)
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Elementos do DOM
+        const userForm = document.getElementById('userForm');
+        const usersList = document.getElementById('usersList');
+        const messageDiv = document.getElementById('message');
+        const formTitle = document.getElementById('formTitle');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const userIdInput = document.getElementById('userId');
+
+        let editMode = false;
+
+        // Função para mostrar mensagens
+        function showMessage(message, type) {
+            messageDiv.innerHTML = `<div class="${type}">${message}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // Função para carregar usuários
+        async function loadUsers() {
+            try {
+                usersList.innerHTML = '<div class="loading">Carregando...</div>';
+                const querySnapshot = await getDocs(collection(db, 'usuarios'));
+                
+                if (querySnapshot.empty) {
+                    usersList.innerHTML = '<div class="no-users">Nenhum usuário cadastrado ainda.</div>';
+                    return;
+                }
+
+                usersList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const userCard = document.createElement('div');
+                    userCard.className = 'user-card';
+                    userCard.innerHTML = `
+                        <div class="user-info"><strong>Nome:</strong> ${user.nome}</div>
+                        <div class="user-info"><strong>E-mail:</strong> ${user.email}</div>
+                        <div class="user-info"><strong>Idade:</strong> ${user.idade} anos</div>
+                        <div class="user-info"><strong>Peso:</strong> ${user.peso} kg</div>
+                        <div class="user-info"><strong>Altura:</strong> ${user.altura} cm</div>
+                        <div class="user-actions">
+                            <button class="btn-edit" onclick="editUser('${doc.id}', '${user.nome}', '${user.email}', '${user.senha}', ${user.idade}, ${user.peso}, ${user.altura})">Editar</button>
+                            <button class="btn-delete" onclick="deleteUser('${doc.id}')">Deletar</button>
+                        </div>
+                    `;
+                    usersList.appendChild(userCard);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                showMessage('Erro ao carregar usuários. Verifique a configuração do Firebase.', 'error');
+            }
+        }
+
+        // Função para cadastrar/atualizar usuário
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const userData = {
+                nome: document.getElementById('nome').value,
+                email: document.getElementById('email').value,
+                senha: document.getElementById('senha').value,
+                idade: parseInt(document.getElementById('idade').value),
+                peso: parseFloat(document.getElementById('peso').value),
+                altura: parseInt(document.getElementById('altura').value)
+            };
+
+            try {
+                if (editMode) {
+                    const userId = userIdInput.value;
+                    await updateDoc(doc(db, 'usuarios', userId), userData);
+                    showMessage('Usuário atualizado com sucesso!', 'success');
+                    cancelEdit();
+                } else {
+                    await addDoc(collection(db, 'usuarios'), userData);
+                    showMessage('Usuário cadastrado com sucesso!', 'success');
+                }
+
+                userForm.reset();
+                loadUsers();
+            } catch (error) {
+                console.error('Erro:', error);
+                showMessage('Erro ao salvar usuário. Verifique a configuração do Firebase.', 'error');
+            }
+        });
+
+        // Função para editar usuário
+        window.editUser = (id, nome, email, senha, idade, peso, altura) => {
+            editMode = true;
+            userIdInput.value = id;
+            document.getElementById('nome').value = nome;
+            document.getElementById('email').value = email;
+            document.getElementById('senha').value = senha;
+            document.getElementById('idade').value = idade;
+            document.getElementById('peso').value = peso;
+            document.getElementById('altura').value = altura;
+
+            formTitle.textContent = 'Editar Usuário';
+            submitBtn.textContent = 'Atualizar';
+            cancelBtn.style.display = 'inline-block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Função para cancelar edição
+        cancelBtn.addEventListener('click', cancelEdit);
+
+        function cancelEdit() {
+            editMode = false;
+            userIdInput.value = '';
+            userForm.reset();
+            formTitle.textContent = 'Cadastrar Novo Usuário';
+            submitBtn.textContent = 'Cadastrar';
+            cancelBtn.style.display = 'none';
+        }
+
+        // Função para deletar usuário
+        window.deleteUser = async (id) => {
+            if (confirm('Tem certeza que deseja deletar este usuário?')) {
+                try {
+                    await deleteDoc(doc(db, 'usuarios', id));
+                    showMessage('Usuário deletado com sucesso!', 'success');
+                    loadUsers();
+                } catch (error) {
+                    console.error('Erro ao deletar:', error);
+                    showMessage('Erro ao deletar usuário.', 'error');
+                }
+            }
+        };
+
+        // Carregar usuários ao iniciar
+        loadUsers();
+    </script>
+</body>
+</html>
